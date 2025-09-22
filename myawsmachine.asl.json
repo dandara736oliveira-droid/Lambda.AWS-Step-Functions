@@ -1,0 +1,42 @@
+{
+  "Comment": "Exemplo de workflow personalizado no Step Functions com Lambda",
+  "StartAt": "ValidarEntrada",
+  "States": {
+    "ValidarEntrada": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123456789012:function:ValidaEntradaLambda",
+      "Next": "ProcessarDados"
+    },
+    "ProcessarDados": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123456789012:function:ProcessaDadosLambda",
+      "Next": "VerificarResultado"
+    },
+    "VerificarResultado": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.status",
+          "StringEquals": "SUCESSO",
+          "Next": "SalvarResultado"
+        },
+        {
+          "Variable": "$.status",
+          "StringEquals": "ERRO",
+          "Next": "TratarErro"
+        }
+      ],
+      "Default": "TratarErro"
+    },
+    "SalvarResultado": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123456789012:function:SalvarResultadoLambda",
+      "End": true
+    },
+    "TratarErro": {
+      "Type": "Fail",
+      "Error": "ErroProcessamento",
+      "Cause": "Os dados não puderam ser processados corretamente."
+    }
+  }
+}
